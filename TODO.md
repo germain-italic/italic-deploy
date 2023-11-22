@@ -1,0 +1,4 @@
+- Add option to cancel deployment after "Select the remote host from your .env where you want to deploy..."
+- Do not display the "Fetching issues from GitLab" banner and the table header if GitLab credentials are not found
+- Ask directly for a commit message instead of an issue number if GitLab credentials are not found
+- Pre-select "Available Git remotes to push to" if there is only one
