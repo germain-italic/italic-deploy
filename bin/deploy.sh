@@ -1,14 +1,14 @@
 #!/bin/bash
-
 # Resolve the directory where the script is located
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-# echo "SCRIPT_DIR: $SCRIPT_DIR"
+echo "SCRIPT_DIR: $SCRIPT_DIR"
+
 
 
 # Check if the script is running within the 'vendor' directory
-if [[ $SCRIPT_DIR == *"/vendor/bin"* ]]; then
+if [[ $SCRIPT_DIR == *"/vendor/"* ]]; then
     # We are in the 'vendor' directory (script used as a dependency)
-    ENV_LOCAL="${SCRIPT_DIR}/../../.env"
+    ENV_LOCAL="${SCRIPT_DIR}/../../../../.env"  # Go two levels up
 else
     # We are in the package's own directory (script used by the maintainer)
     ENV_LOCAL="${SCRIPT_DIR}/../.env"
