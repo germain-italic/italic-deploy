@@ -2,10 +2,33 @@
 
 # Resolve the directory where the script is located
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+# echo "SCRIPT_DIR: $SCRIPT_DIR"
+
+
+# Check if the script is running within the 'vendor' directory
+if [[ $SCRIPT_DIR == *"/vendor/bin"* ]]; then
+    # We are in the 'vendor' directory (script used as a dependency)
+    ENV_LOCAL="${SCRIPT_DIR}/../../.env"
+else
+    # We are in the package's own directory (script used by the maintainer)
+    ENV_LOCAL="${SCRIPT_DIR}/../.env"
+fi
+
+
+
+# Now source the .env file if it exists
+if [ -f "$ENV_LOCAL" ]; then
+    source "$ENV_LOCAL"
+else
+    echo "Warning: .env file not found at $ENV_LOCAL"
+    exit 1
+fi
+
+
 
 # Source the gitlab_functions.sh script using the resolved path
 source "${SCRIPT_DIR}/gitlab_functions.sh"
-select_gitlab_issue
+# select_gitlab_issue
 
 
 
@@ -18,12 +41,6 @@ if [[ -z "$REPO_ROOT" ]]; then
 else
     cd "$REPO_ROOT"
 fi
-
-
-
-# Check local config file (.env)
-ENV_LOCAL=".env"
-[[ ! -f $ENV_LOCAL ]] && echo "Error: missing .env local file in $ENV_LOCAL" && exit 1
 
 
 
