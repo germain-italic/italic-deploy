@@ -9,5 +9,11 @@
             "email": "germain@italic.fr"
         }
     ],
-    "require": {}
+    "require": {},
+    "bin": [
+        "bin/deploy.sh",
+        "bin/gitlab_functions.sh",
+        "bin/sync_db.sh",
+        "bin/sync_uploads.sh"
+    ],
 }
