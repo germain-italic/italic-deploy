@@ -2,3 +2,4 @@
 - Do not display the "Fetching issues from GitLab" banner and the table header if GitLab credentials are not found
 - Ask directly for a commit message instead of an issue number if GitLab credentials are not found
 - Pre-select "Available Git remotes to push to" if there is only one
+- Add an option to bypass "Available Git remotes to push to" step (ie just deploy without pushing)
