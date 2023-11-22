@@ -15,5 +15,9 @@
         "bin/gitlab_functions.sh",
         "bin/sync_db.sh",
         "bin/sync_uploads.sh"
-    ]
+    ],
+    "scripts": {
+        "post-install-cmd": "echo 'Reminder: Run deployment scripts with bash vendor/bin/deploy.sh (or sync_db.sh, sync_uploads.sh)'",
+        "post-update-cmd": "echo 'Reminder: Run deployment scripts with bash vendor/bin/deploy.sh (or sync_db.sh, sync_uploads.sh)'"
+    }
 }
