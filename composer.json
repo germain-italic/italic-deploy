@@ -1,0 +1,13 @@
+{
+    "name": "germain-italic/italic-deploy",
+    "description": "A collection of deployment scripts",
+    "type": "library",
+    "license": "LGPL",
+    "authors": [
+        {
+            "name": "Germain Metti",
+            "email": "germain@italic.fr"
+        }
+    ],
+    "require": {}
+}
