@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# Resolve the directory where the script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
+# Source the gitlab_functions.sh script using the resolved path
+source "${SCRIPT_DIR}/gitlab_functions.sh"
+select_gitlab_issue
+
+
+
 # Determine the root directory of the Git repository
 REPO_ROOT=$(git rev-parse --show-toplevel)
 
@@ -15,12 +24,6 @@ fi
 # Check local config file (.env)
 ENV_LOCAL=".env"
 [[ ! -f $ENV_LOCAL ]] && echo "Error: missing .env local file in $ENV_LOCAL" && exit 1
-
-
-
-# Includes (kind of)
-source "${REPO_ROOT}/scripts/gitlab_functions.sh"
-# select_gitlab_issue
 
 
 
