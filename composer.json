@@ -15,5 +15,5 @@
         "bin/gitlab_functions.sh",
         "bin/sync_db.sh",
         "bin/sync_uploads.sh"
-    ],
+    ]
 }
