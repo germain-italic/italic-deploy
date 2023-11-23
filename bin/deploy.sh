@@ -83,14 +83,23 @@ fi
 if [[ "$pending_confirmation" == "y" ]]; then
     git config --global core.autocrlf true
 
+    # List staged files
+    STAGED_FILES=$(git diff --cached --name-only)
+    if [ -n "$STAGED_FILES" ]; then
+        echo "Staged files (already in Git index):"
+        echo "$STAGED_FILES"
+        echo ""
+    fi
+
+
     # List uncommitted changes
     echo "Checking for uncommitted changes..."
-    UNCOMMITTED_FILES=$(git status --porcelain)
+    UNCOMMITTED_FILES=$(git status --porcelain | grep '^ M')
 
     if [[ -z "$UNCOMMITTED_FILES" ]]; then
         echo "No uncommitted changes found."
     else
-        echo "Uncommitted changes found:"
+        echo "Unstaged changes found:"
         echo "$UNCOMMITTED_FILES"
 
         # Ask the user for each file if they want to add it to the index
