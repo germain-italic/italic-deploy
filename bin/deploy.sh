@@ -163,67 +163,63 @@ if [[ "$push_confirmation" == "y" ]]; then
 
 
 
-    # Select a remote
-    echo ""
+    # List available remotes
     echo "Available Git remotes to push to:"
-    PS3="Select a remote to push to (enter the number): "
+    PS3="Select a remote to push to (enter the number, space-separated for multiple remotes, 'q' to quit): "
+
+    # Create an array to store selected remotes
+    selected_remotes=()
+
     select selected_remote in "${LOCAL_REMOTES[@]}"
     do
-        if [[ -n "$selected_remote" ]]; then
-            break
+        case "$selected_remote" in
+            "q")
+                break  # Quit the selection
+                ;;
+            *)
+                selected_remotes+=("$selected_remote")
+                ;;
+        esac
+    done
+
+    # Check if any remotes were selected
+    if [[ "${#selected_remotes[@]}" -eq 0 ]]; then
+        echo "No remotes selected."
+        break
+    fi
+
+    # Loop through selected remotes and perform git push
+    for remote in "${selected_remotes[@]}"
+    do
+        # Check for unpushed commits
+        echo "Checking for pending commits to send to $remote..."
+        PENDING_COMMITS=$(git log $remote/$(git rev-parse --abbrev-ref HEAD)..HEAD --oneline)
+
+        if [[ -z "$PENDING_COMMITS" ]]; then
+            echo "No pending commits found to push to $remote."
         else
-            echo "Invalid selection. Please try again."
+            echo "Pending commits to be pushed to $remote:"
+            echo "$PENDING_COMMITS"
+            echo ""
+            echo -n "Do you want to continue and push these commits to $remote? (y/n) [y]"
+            read user_confirm
+
+            if [[ -z "$user_confirm" ]]; then
+                user_confirm="y"
+                echo "y"
+            fi
+
+            if [[ "$user_confirm" != "y" ]]; then
+                echo "Push to $remote cancelled."
+            else
+                echo "Executing git push to $remote..."
+                git push $remote $(git rev-parse --abbrev-ref HEAD)
+                echo "Push operation completed for $remote."
+                echo ""
+            fi
         fi
     done
 
-
-
-    # Check for unpushed commits
-    echo "Checking for pending commits to send to $selected_remote..."
-    PENDING_COMMITS=$(git log $selected_remote/$(git rev-parse --abbrev-ref HEAD)..HEAD --oneline)
-    if [[ -z "$PENDING_COMMITS" ]]
-    then
-        echo "No pending commits found to push."
-
-        # Get the details of the last commit
-        LAST_COMMIT_DETAILS=$(git log -1 --format="%cd %h %ae %s" --date=format:'%Y-%m-%d %H:%M:%S')
-        echo "Current state: $LAST_COMMIT_DETAILS"
-        echo ""
-        echo -n "Do you want to deploy it to a remote server (y/n) [y]?"
-        read -r deploy_confirmation
-
-        # If no input (enter pressed), set the default to 'y'
-        if [[ -z "$deploy_confirmation" ]]; then
-            deploy_confirmation="y"
-            echo "y"
-        fi
-
-        if [[ "$deploy_confirmation" != "y" ]]; then
-            exit 1
-        fi
-    else
-        echo "Pending commits to be pushed:"
-        echo "$PENDING_COMMITS"
-        echo ""
-        echo -n "Do you want to continue and push these commits to $selected_remote? (y/n) [y]"
-        read user_confirm
-
-        if [[ -z "$user_confirm" ]]; then
-            user_confirm="y"
-            echo "y"
-        fi
-
-        if [[ "$user_confirm" != "y" ]]; then
-            echo "Push cancelled."
-            exit 1
-        else
-            echo "Executing git push to $selected_remote..."
-            git push $selected_remote $(git rev-parse --abbrev-ref HEAD)
-            echo "Push operation completed."
-            echo ""
-        fi
-    fi
-fi
 
 
 
