@@ -104,7 +104,7 @@ select_gitlab_issue() {
                 done
 
                 # Capture user selection
-                read -p "Enter issue number or type a custom message: " issue_number
+                read -p "Enter issue number, type a custom message, or 'refresh': " issue_number
             else
                 # Capture user selection
                 read -p "Type a custom message: " issue_number
@@ -119,8 +119,14 @@ select_gitlab_issue() {
                 echo "Custom commit message set to: $COMMIT_MESSAGE"
                 break  # Exit the loop after getting a custom message
             else
+                # Check if the user wants to refresh the issue list
+                if [[ "$issue_number" == "refresh" ]]; then
+                    echo "Refreshing issues list..."
+                    break  # Break out of the inner loop to refresh the issues
+                fi
+
+                # Check if the input is a valid issue number
                 if [[ $issue_number =~ ^[0-9]+$ ]]; then
-                    # Check if the input is a valid issue number
                     issue_title=$(echo "$ISSUES" | jq -r --arg num "$issue_number" '.[] | select(.iid == ($num | tonumber)) | .title')
 
                     if [[ ! -z "$issue_title" ]]; then
@@ -143,28 +149,32 @@ select_gitlab_issue() {
 
         done
 
-        # Output the final commit message for confirmation
-        echo ""
-        echo "Final commit message will be: $COMMIT_MESSAGE"
+        # Check if commit message is empty
+        if [[ ! -z "$COMMIT_MESSAGE" ]]; then
+            # Output the final commit message for confirmation
+            echo ""
+            echo "Final commit message will be: $COMMIT_MESSAGE"
 
-        # Ask user to confirm or restart
-        echo -n "Do you want to commit with this message [commit] or edit [edit]? (commit/edit) [commit]"
-        read -r action_choice
+            # Ask user to confirm or restart
+            echo -n "Do you want to commit with this message [commit] or edit [edit]? (commit/edit) [commit]"
+            read -r action_choice
 
-        if [[ -z "$action_choice" ]] || [[ "$action_choice" == "commit" ]]; then
-            echo "commit"
-            break
-        elif [[ "$action_choice" == "edit" ]]; then
-            echo "Restarting the process..."
-            continue
-        else
-            echo "Invalid input. Defaulting to commit."
-            break
+            if [[ -z "$action_choice" ]] || [[ "$action_choice" == "commit" ]]; then
+                echo "commit"
+
+                # Proceed with the commit
+                echo "Committing changes..."
+                git commit -m "$COMMIT_MESSAGE"
+                echo "Changes committed."
+
+                break
+            elif [[ "$action_choice" == "edit" ]]; then
+                echo "Restarting the process..."
+                continue
+            else
+                echo "Invalid input. Defaulting to commit."
+                break
+            fi
         fi
     done
-
-    # Proceed with the commit
-    echo "Committing changes..."
-    git commit -m "$COMMIT_MESSAGE"
-    echo "Changes committed."
 }
