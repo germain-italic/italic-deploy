@@ -1,4 +1,31 @@
 #!/bin/bash
+# Resolve the directory where the script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+# echo "SCRIPT_DIR: $SCRIPT_DIR"
+
+
+
+# Check if the script is running within the 'vendor' directory
+if [[ $SCRIPT_DIR == *"/vendor/"* ]]; then
+    # We are in the 'vendor' directory (script used as a dependency)
+    ROOT_DIR="${SCRIPT_DIR}/../../../.."
+else
+    # We are in the package's own directory (script used by the maintainer)
+    ROOT_DIR="${SCRIPT_DIR}/.."
+fi
+ROOT_DIR=$(realpath $ROOT_DIR)
+ENV_LOCAL="${ROOT_DIR}/.env"
+# echo $ROOT_DIR
+
+
+# Now source the .env file if it exists
+if [ -f "$ENV_LOCAL" ]; then
+    source "$ENV_LOCAL"
+else
+    echo "Warning: .env file not found at $ENV_LOCAL"
+    exit 1
+fi
+
 
 if ! command -v rsync &> /dev/null
 then
@@ -6,9 +33,7 @@ then
     exit
 fi
 
-# fichier de conf local
-ENV_LOCAL="$(pwd)/../.env"
-[[ ! -f $ENV_LOCAL ]] && echo "Error: missing .env local file in $ENV_LOCAL" && exit 1
+
 
 # remotes dans le fichier de conf
 REMOTES=`cat $ENV_LOCAL | grep REMOTES |  cut -d "=" -f2-`
@@ -41,8 +66,8 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 # echo "SCRIPT_DIR : $SCRIPT_DIR"
 
 RSYNC_PARAMS="-azu --progress --info=NAME1"
-RSYNC_LOCAL="${SCRIPT_DIR}/../${SSH_SYNC}"
-RSYNC_REMOTE="${SSH_USER}@${SSH_HOST}:${SSH_DIR}/${SSH_SYNC}"
+RSYNC_LOCAL="${ROOT_DIR}${SSH_SYNC}"
+RSYNC_REMOTE="${SSH_USER}@${SSH_HOST}:${SSH_DIR}${SSH_SYNC}"
 RSYNC_SSH="-e 'ssh -p ${SSH_PORT}'"
 
 

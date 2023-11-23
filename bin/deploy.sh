@@ -8,11 +8,14 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 # Check if the script is running within the 'vendor' directory
 if [[ $SCRIPT_DIR == *"/vendor/"* ]]; then
     # We are in the 'vendor' directory (script used as a dependency)
-    ENV_LOCAL="${SCRIPT_DIR}/../../../../.env"  # Go two levels up
+    ROOT_DIR="${SCRIPT_DIR}/../../../.."
 else
     # We are in the package's own directory (script used by the maintainer)
-    ENV_LOCAL="${SCRIPT_DIR}/../.env"
+    ROOT_DIR="${SCRIPT_DIR}/.."
 fi
+ROOT_DIR=$(realpath $ROOT_DIR)
+ENV_LOCAL="${ROOT_DIR}/.env"
+# echo $ROOT_DIR
 
 
 
