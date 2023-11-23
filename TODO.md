@@ -4,3 +4,4 @@
 - Pre-select "Available Git remotes to push to" if there is only one
 - ~~Add an option to bypass "Available Git remotes to push to" step (ie just deploy without pushing)~~
 - Install jq dependency automatically (depending on platform)
+- Add an option to push on multiple git repositories
