@@ -86,11 +86,13 @@ if [[ "$pending_confirmation" == "y" ]]; then
     git config --global core.autocrlf true
 
     # List staged files
+    STAGED_FILES_EXIST=false
     STAGED_FILES=$(git diff --cached --name-only)
     if [ -n "$STAGED_FILES" ]; then
         echo "Staged files (already in Git index):"
         echo "$STAGED_FILES"
         echo ""
+        STAGED_FILES_EXIST=true
     fi
 
 
@@ -114,6 +116,7 @@ if [[ "$pending_confirmation" == "y" ]]; then
             if [[ "$add_confirm" == "y" ]]; then
                 git add "$file_path"
                 echo "$file_path added to index."
+                STAGED_FILES_EXIST=true
             fi
         done
         unset IFS
@@ -124,10 +127,16 @@ if [[ "$pending_confirmation" == "y" ]]; then
         else
             echo "Refreshing git index..."
             git status
-            select_gitlab_issue
         fi
 
     fi
+fi
+
+
+
+# Check for staged files again and ask for commit message
+if [ -n "$STAGED_FILES_EXIST" ]; then
+    select_gitlab_issue
 fi
 
 
