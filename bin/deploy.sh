@@ -56,12 +56,13 @@ fi
 # Ask for confirmation of the branch
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 echo "You are currently on branch: $current_branch"
-echo "Is this the branch you want to deploy? (Y/n) [y]"
+echo -n "Is this the branch you want to deploy? (Y/n) [y]"
 read -r branch_confirmation
 
 # If no input (enter pressed), set the default to 'y'
 if [[ -z "$branch_confirmation" ]]; then
     branch_confirmation="y"
+    echo "y"
 fi
 
 if [[ "$branch_confirmation" != "y" ]]; then
@@ -72,12 +73,13 @@ fi
 
 
 # Review current status
-echo "Do you want to review your pending (uncommitted) changes? (Y/n) [y]"
+echo -n "Do you want to review your pending (uncommitted) changes? (Y/n) [y]"
 read -r pending_confirmation
 
 # If no input (enter pressed), set the default to 'y'
 if [[ -z "$pending_confirmation" ]]; then
     pending_confirmation="y"
+    echo "y"
 fi
 
 if [[ "$pending_confirmation" == "y" ]]; then
@@ -131,12 +133,13 @@ fi
 
 
 # Do we perform a push?
-echo "Do you want to push the current state of the repository? (Y/n) [y]"
+echo -n "Do you want to push the current state of the repository? (Y/n) [y]"
 read -r push_confirmation
 
 # If no input (enter pressed), set the default to 'y'
 if [[ -z "$push_confirmation" ]]; then
     push_confirmation="y"
+    echo "y"
 fi
 
 if [[ "$push_confirmation" == "y" ]]; then
@@ -177,12 +180,13 @@ if [[ "$push_confirmation" == "y" ]]; then
         LAST_COMMIT_DETAILS=$(git log -1 --format="%cd %h %ae %s" --date=format:'%Y-%m-%d %H:%M:%S')
         echo "Current state: $LAST_COMMIT_DETAILS"
         echo ""
-        echo "Do you want to deploy it to a remote server (y/n) [y]?"
+        echo -n "Do you want to deploy it to a remote server (y/n) [y]?"
         read -r deploy_confirmation
 
         # If no input (enter pressed), set the default to 'y'
         if [[ -z "$deploy_confirmation" ]]; then
             deploy_confirmation="y"
+            echo "y"
         fi
 
         if [[ "$deploy_confirmation" != "y" ]]; then
@@ -192,11 +196,12 @@ if [[ "$push_confirmation" == "y" ]]; then
         echo "Pending commits to be pushed:"
         echo "$PENDING_COMMITS"
         echo ""
-        echo "Do you want to continue and push these commits to $selected_remote? (y/n) [y]"
+        echo -n "Do you want to continue and push these commits to $selected_remote? (y/n) [y]"
         read user_confirm
 
         if [[ -z "$user_confirm" ]]; then
             user_confirm="y"
+            echo "y"
         fi
 
         if [[ "$user_confirm" != "y" ]]; then
@@ -248,12 +253,13 @@ echo "SSH_USER : $SSH_USER"
 
 echo ""
 while true; do
-    echo "Do you want to continue and pull ${selected_remote}/${current_branch} on ${SSH_HOST} in ${SSH_DIR}? (y/n) [y]"
+    echo -n "Do you want to continue and pull ${selected_remote}/${current_branch} on ${SSH_HOST} in ${SSH_DIR}? (y/n) [y]"
     read -r direction_confirmation
 
     # If no input (enter pressed), set the default to 'y'
     if [[ -z "$direction_confirmation" ]]; then
         direction_confirmation="y"
+        echo "y"
     fi
 
     # Check if the input is either 'y' or 'n'

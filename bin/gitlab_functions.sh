@@ -144,13 +144,15 @@ select_gitlab_issue() {
         done
 
         # Output the final commit message for confirmation
+        echo ""
         echo "Final commit message will be: $COMMIT_MESSAGE"
 
         # Ask user to confirm or restart
-        echo "Do you want to commit with this message or edit? (commit/edit) [commit]"
+        echo -n "Do you want to commit with this message [y] or edit [n]? (y/n) [y]"
         read -r action_choice
 
         if [[ -z "$action_choice" ]] || [[ "$action_choice" == "commit" ]]; then
+            echo "y"
             break
         elif [[ "$action_choice" == "edit" ]]; then
             echo "Restarting the process..."
