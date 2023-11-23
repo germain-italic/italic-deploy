@@ -244,88 +244,103 @@ if [[ "$push_confirmation" == "y" ]]; then
 fi
 
 
-# Remotes listed in the config file
-echo "Select the remote host from your .env where you want to deploy ${selected_remote}/${current_branch}"
+# Do we perform a deploy?
+echo -n "Do you want to deploy (pull) the repository from the $remote upstream to a remote host? (Y/n) [y]"
+read -r deploy_confirmation
 
-REMOTES=`cat $ENV_LOCAL | grep REMOTES |  cut -d "=" -f2-`
-if [[ -z "$REMOTES" ]]
-then
-    echo "\$REMOTES is empty"
-    exit 1
+# If no input (enter pressed), set the default to 'y'
+if [[ -z "$deploy_confirmation" ]]; then
+    deploy_confirmation="y"
+    echo "y"
 fi
 
-PS3="Choice number: "
-REMOTES=`echo $REMOTES | tr -d '"'`
-select REMOTE in $REMOTES
-do
-    echo "Selected remote: $REMOTE"
-    break
-done
+if [[ "$deploy_confirmation" == "y" ]]; then
 
 
 
-# Get the variables for the selected remote
-VARS=("DIR" "HOST" "PORT" "USER")
+    # Remotes listed in the config file
+    echo "Select the remote host from your .env where you want to deploy ${selected_remote}/${current_branch}"
 
-for VAR in ${VARS[@]}; do
-    declare "SSH_${VAR}"=`cat $ENV_LOCAL | grep "${REMOTE}_SSH_${VAR}" |  cut -d "=" -f2-`
-done
-
-echo ""
-echo "SSH_DIR  : $SSH_DIR"
-echo "SSH_HOST : $SSH_HOST"
-echo "SSH_PORT : $SSH_PORT"
-echo "SSH_USER : $SSH_USER"
-
-echo ""
-while true; do
-    echo -n "Do you want to continue and pull ${selected_remote}/${current_branch} on ${SSH_HOST} in ${SSH_DIR}? (y/n) [y]"
-    read -r direction_confirmation
-
-    # If no input (enter pressed), set the default to 'y'
-    if [[ -z "$direction_confirmation" ]]; then
-        direction_confirmation="y"
-        echo "y"
-    fi
-
-    # Check if the input is either 'y' or 'n'
-    if [[ "$direction_confirmation" == "y" ]]; then
-        echo "Deploying..."
-        break
-    elif [[ "$direction_confirmation" == "n" ]]; then
-        echo "Deployment cancelled."
+    REMOTES=`cat $ENV_LOCAL | grep REMOTES |  cut -d "=" -f2-`
+    if [[ -z "$REMOTES" ]]
+    then
+        echo "\$REMOTES is empty"
         exit 1
-    else
-        echo "Invalid input. Please enter 'y' for yes or 'n' for no."
     fi
-done
+
+    PS3="Choice number: "
+    REMOTES=`echo $REMOTES | tr -d '"'`
+    select REMOTE in $REMOTES
+    do
+        echo "Selected remote: $REMOTE"
+        break
+    done
 
 
 
-# Define the SSH server and path details
-SSH_SERVER="${SSH_USER}@${SSH_HOST}"
+    # Get the variables for the selected remote
+    VARS=("DIR" "HOST" "PORT" "USER")
 
-# Simply test the connexion
-# SSH to the server and execute commands
-# ssh -t -p $SSH_PORT $SSH_SERVER "
-#     echo 'Changing to directory: $SSH_DIR';
-#     cd $SSH_DIR;
-#     echo 'Reading from remote server...';
-#     whoami;
-#     pwd;
-# "
+    for VAR in ${VARS[@]}; do
+        declare "SSH_${VAR}"=`cat $ENV_LOCAL | grep "${REMOTE}_SSH_${VAR}" |  cut -d "=" -f2-`
+    done
+
+    echo ""
+    echo "SSH_DIR  : $SSH_DIR"
+    echo "SSH_HOST : $SSH_HOST"
+    echo "SSH_PORT : $SSH_PORT"
+    echo "SSH_USER : $SSH_USER"
+
+    echo ""
+    while true; do
+        echo -n "Do you want to continue and pull ${selected_remote}/${current_branch} on ${SSH_HOST} in ${SSH_DIR}? (y/n) [y]"
+        read -r direction_confirmation
+
+        # If no input (enter pressed), set the default to 'y'
+        if [[ -z "$direction_confirmation" ]]; then
+            direction_confirmation="y"
+            echo "y"
+        fi
+
+        # Check if the input is either 'y' or 'n'
+        if [[ "$direction_confirmation" == "y" ]]; then
+            echo "Deploying..."
+            break
+        elif [[ "$direction_confirmation" == "n" ]]; then
+            echo "Deployment cancelled."
+            exit 1
+        else
+            echo "Invalid input. Please enter 'y' for yes or 'n' for no."
+        fi
+    done
 
 
 
-# Proceed to deployment using git
-ssh -t -p $SSH_PORT $SSH_SERVER "
-    echo 'Connected to ${SSH_SERVER}...';
-    cd $SSH_DIR;
-    echo 'Performing remote git pull in ${SSH_DIR}...';
-    git pull;
-    exit;
-"
+    # Define the SSH server and path details
+    SSH_SERVER="${SSH_USER}@${SSH_HOST}"
 
+    # Simply test the connexion
+    # SSH to the server and execute commands
+    # ssh -t -p $SSH_PORT $SSH_SERVER "
+    #     echo 'Changing to directory: $SSH_DIR';
+    #     cd $SSH_DIR;
+    #     echo 'Reading from remote server...';
+    #     whoami;
+    #     pwd;
+    # "
+
+
+
+    # Proceed to deployment using git
+    ssh -t -p $SSH_PORT $SSH_SERVER "
+        echo 'Connected to ${SSH_SERVER}...';
+        cd $SSH_DIR;
+        echo 'Performing remote git pull in ${SSH_DIR}...';
+        git pull;
+        exit;
+    "
+
+fi
 
 # End of script
 echo "End of script."
