@@ -191,6 +191,7 @@ if [[ "$push_confirmation" == "y" ]]; then
     else
         echo "Pending commits to be pushed:"
         echo "$PENDING_COMMITS"
+        echo ""
         echo "Do you want to continue and push these commits to $selected_remote? (y/n) [y]"
         read user_confirm
 
