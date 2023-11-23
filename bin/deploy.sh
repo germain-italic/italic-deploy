@@ -86,7 +86,6 @@ if [[ "$pending_confirmation" == "y" ]]; then
     git config --global core.autocrlf true
 
     # List staged files
-    STAGED_FILES_EXIST=false
     STAGED_FILES=$(git diff --cached --name-only)
     if [ -n "$STAGED_FILES" ]; then
         echo "Staged files (already in Git index):"
@@ -130,13 +129,12 @@ if [[ "$pending_confirmation" == "y" ]]; then
         fi
 
     fi
-fi
 
-
-
-# Check for staged files again and ask for commit message
-if [ -n "$STAGED_FILES_EXIST" ]; then
-    select_gitlab_issue
+    # Check for staged files again and ask for commit message
+    if [ -n "$STAGED_FILES_EXIST" ]; then
+        echo $UNCOMMITTED_FILES
+        select_gitlab_issue
+    fi
 fi
 
 
@@ -157,70 +155,93 @@ if [[ "$push_confirmation" == "y" ]]; then
     # echo "Fetching local Git remotes..."
     LOCAL_REMOTES=($(git remote))
     if [[ ${#LOCAL_REMOTES[@]} -eq 0 ]]; then
-        echo "No Git remotes found."
+        echo "No Git remote upstream found."
         exit 1
     fi
 
 
 
-    # List available remotes
-    echo "Available Git remotes to push to:"
-    PS3="Select a remote to push to (enter the number, space-separated for multiple remotes, 'q' to quit): "
+    # List available remotes and initialize select_index
+    echo "Available Git remote upstreams to push to:"
+    select_index=0
+    for remote in "${LOCAL_REMOTES[@]}"; do
+        ((select_index++))
+        echo "$select_index) $remote"
+    done
 
     # Create an array to store selected remotes
     selected_remotes=()
 
-    select selected_remote in "${LOCAL_REMOTES[@]}"
-    do
-        case "$selected_remote" in
-            "q")
-                break  # Quit the selection
-                ;;
-            *)
-                selected_remotes+=("$selected_remote")
-                ;;
-        esac
-    done
+    while true; do
+        read -r -p "Enter the numbers of the remote upstreams to push to (space-separated), or 'n' to bypass git push: " input
+        input="${input%"${input##*[![:space:]]}"}"  # Remove trailing whitespace including newline
 
-    # Check if any remotes were selected
-    if [[ "${#selected_remotes[@]}" -eq 0 ]]; then
-        echo "No remotes selected."
-        break
-    fi
-
-    # Loop through selected remotes and perform git push
-    for remote in "${selected_remotes[@]}"
-    do
-        # Check for unpushed commits
-        echo "Checking for pending commits to send to $remote..."
-        PENDING_COMMITS=$(git log $remote/$(git rev-parse --abbrev-ref HEAD)..HEAD --oneline)
-
-        if [[ -z "$PENDING_COMMITS" ]]; then
-            echo "No pending commits found to push to $remote."
+        if [[ "$input" == "n" ]]; then
+            break
         else
-            echo "Pending commits to be pushed to $remote:"
-            echo "$PENDING_COMMITS"
-            echo ""
-            echo -n "Do you want to continue and push these commits to $remote? (y/n) [y]"
-            read user_confirm
+            # Split the input by space
+            read -ra numbers <<< "$input"
+            valid_input=true
 
-            if [[ -z "$user_confirm" ]]; then
-                user_confirm="y"
-                echo "y"
-            fi
+            for number in "${numbers[@]}"; do
+                if [[ "$number" -lt 1 || "$number" -gt "$select_index" ]]; then
+                    echo "Invalid input. Enter valid numbers between 1 and $select_index."
+                    valid_input=false
+                    break
+                else
+                    selected_remote="${LOCAL_REMOTES[$((number - 1))]}"
+                    selected_remotes+=("$selected_remote")
+                fi
+            done
 
-            if [[ "$user_confirm" != "y" ]]; then
-                echo "Push to $remote cancelled."
-            else
-                echo "Executing git push to $remote..."
-                git push $remote $(git rev-parse --abbrev-ref HEAD)
-                echo "Push operation completed for $remote."
-                echo ""
+            if $valid_input; then
+                break
             fi
         fi
     done
 
 
+
+
+
+    # Check if any remotes were selected
+    if [[ "${#selected_remotes[@]}" -eq 0 ]]; then
+        echo "No remote upstreams selected."
+    else
+        # Loop through selected remotes and perform git push
+        for remote in "${selected_remotes[@]}"
+        do
+            # Check for unpushed commits
+            echo "Checking for pending commits to send to $remote..."
+            PENDING_COMMITS=$(git log $remote/$(git rev-parse --abbrev-ref HEAD)..HEAD --oneline)
+
+            if [[ -z "$PENDING_COMMITS" ]]; then
+                echo "No pending commits found to push to $remote."
+            else
+                echo "Pending commits to be pushed to $remote:"
+                echo "$PENDING_COMMITS"
+                echo ""
+                echo -n "Do you want to continue and push these commits to the $remote upstream? (y/n) [y]"
+                read user_confirm
+
+                if [[ -z "$user_confirm" ]]; then
+                    user_confirm="y"
+                    echo "y"
+                fi
+
+                if [[ "$user_confirm" != "y" ]]; then
+                    echo "Push to $remote cancelled."
+                else
+                    echo "Executing git push to $remote..."
+                    git push $remote $(git rev-parse --abbrev-ref HEAD)
+                    echo "Push operation completed for $remote."
+                    echo ""
+                fi
+            fi
+        done
+    fi
+
+fi
 
 
 # Remotes listed in the config file
