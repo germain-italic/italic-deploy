@@ -112,8 +112,8 @@ if [[ "$pending_confirmation" == "y" ]]; then
         IFS=$'\n'
         for file in $UNCOMMITTED_FILES; do
             file_path=$(echo $file | awk '{print $2}')
-            read -p "Do you want to add $file_path to the index? (y/n) [n] " add_confirm
-            add_confirm=${add_confirm:-n}
+            read -p "Do you want to add $file_path to the index? (y/n) [y] " add_confirm
+            add_confirm=${add_confirm:-y}
 
             if [[ "$add_confirm" == "y" ]]; then
                 git add "$file_path"
