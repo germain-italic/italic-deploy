@@ -5,3 +5,4 @@
 - ~~Add an option to bypass "Available Git remotes to push to" step (ie just deploy without pushing)~~
 - Install jq dependency automatically (depending on platform)
 - ~~Add an option to push on multiple git repositories~~
+- It looks there is a bug: newly created files (unindex) are not shown in the review list
