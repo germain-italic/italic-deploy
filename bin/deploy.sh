@@ -224,22 +224,23 @@ if [[ "$push_confirmation" == "y" ]]; then
                 echo "Pending commits to be pushed to $remote:"
                 echo "$PENDING_COMMITS"
                 echo ""
-                echo -n "Do you want to continue and push these commits to the $remote upstream? (y/n) [y]"
-                read user_confirm
+                # uncomment to add confirmation before push
+                # echo -n "Do you want to continue and push these commits to the $remote upstream? (y/n) [y]"
+                # read user_confirm
 
-                if [[ -z "$user_confirm" ]]; then
-                    user_confirm="y"
-                    echo "y"
-                fi
+                # if [[ -z "$user_confirm" ]]; then
+                #     user_confirm="y"
+                #     echo "y"
+                # fi
 
-                if [[ "$user_confirm" != "y" ]]; then
-                    echo "Push to $remote cancelled."
-                else
+                # if [[ "$user_confirm" != "y" ]]; then
+                #     echo "Push to $remote cancelled."
+                # else
                     echo "Executing git push to $remote..."
                     git push $remote $(git rev-parse --abbrev-ref HEAD)
                     echo "Push operation completed for $remote."
                     echo ""
-                fi
+                # fi
             fi
         done
     fi
